@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Control Interno COSO</title>
+    <!-- 
+    ==========================================
+    © 2025 TODOS LOS DERECHOS RESERVADOS
+    Este código es propiedad exclusiva del desarrollador
+    Su uso, copia o distribución no autorizada está prohibida
+    Violaciones serán perseguidas legalmente
+    ==========================================
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-card.excellent {
+            background: #38ef7d;
+        }
+
+        .summary-card.good {
+            background: #4facfe;
+        }
+
+        .summary-card.moderate {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .summary-card.low {
+            background: #ff6b6b;
+        }
+
+        .summary-label {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-meta {
+            font-size: 12px;
+            opacity: 0.85;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            color: #6c757d;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            color: #495057;
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .efficiency-badge {
+            font-size: 16px;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+        }
+
+        .efficiency-badge.excellent {
+            background: #d3f9d8;
+            color: #2b8a3e;
+        }
+
+        .efficiency-badge.good {
+            background: #d0ebff;
+            color: #1864ab;
+        }
+
+        .efficiency-badge.moderate {
+            background: #fff3bf;
+            color: #e67700;
+        }
+
+        .efficiency-badge.low {
+            background: #ffe3e3;
+            color: #c92a2a;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 400px;
+        }
+
+        .component-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .component-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+            transition: transform 0.2s ease;
+        }
+
+        .component-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+        }
+
+        .component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .component-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .component-score {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .observations {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #495057;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
+
+        .observations.alert {
+            background: #fff5f5;
+            border-left: 3px solid #ff6b6b;
+            color: #c92a2a;
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            height: 25px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 700;
+            transition: width 1s ease;
+        }
+
+        .disclosure {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        .disclosure strong {
+            color: #2c3e50;
+        }
+
+        /* ==================== PROTECCIÓN DE CONTENIDO ==================== */
+        
+        body::before {
+            content: '© Dashboard Protegido';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.03);
+            z-index: 9999;
+            pointer-events: none;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+        
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        img {
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            user-drag: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            animation: fadeIn 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏢 AGRUPACIÓN DE VIVIENDA QUINTAS DE SERREZUELA</h1>
+            <h2>Cuestionario Control Interno - Marco Conceptual Integrado COSO 2013</h2>
+            <p>Entrevistado: Danista Benítez | Cargo: Administradora y Representante Legal | Fecha: Septiembre 09 de 2025</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Resumen Ejecutivo -->
+            <div class="summary-grid">
+                <div class="summary-card good">
+                    <div class="summary-label">Eficacia General</div>
+                    <div class="summary-value">82.2%</div>
+                    <div class="summary-meta">Nivel: Bueno</div>
+                </div>
+                <div class="summary-card excellent">
+                    <div class="summary-label">Ambiente de Control</div>
+                    <div class="summary-value">18.2%</div>
+                    <div class="summary-meta">11 preguntas evaluadas</div>
+                </div>
+                <div class="summary-card moderate">
+                    <div class="summary-label">Evaluación de Riesgos</div>
+                    <div class="summary-value">27.3%</div>
+                    <div class="summary-meta">9 preguntas evaluadas</div>
+                </div>
+                <div class="summary-card excellent">
+                    <div class="summary-label">Actividades de Control</div>
+                    <div class="summary-value">76.9%</div>
+                    <div class="summary-meta">8 preguntas evaluadas</div>
+                </div>
+                <div class="summary-card excellent">
+                    <div class="summary-label">Información y Comunicación</div>
+                    <div class="summary-value">89.7%</div>
+                    <div class="summary-meta">10 preguntas evaluadas</div>
+                </div>
+                <div class="summary-card excellent">
+                    <div class="summary-label">Actividades de Supervisión</div>
+                    <div class="summary-value">83.3%</div>
+                    <div class="summary-meta">6 preguntas evaluadas</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('overview')">📊 Vista General</button>
+                <button class="tab" onclick="showTab('ambiente')">🏛️ Ambiente de Control</button>
+                <button class="tab" onclick="showTab('riesgos')">⚠️ Evaluación de Riesgos</button>
+                <button class="tab" onclick="showTab('actividades')">✅ Actividades de Control</button>
+                <button class="tab" onclick="showTab('informacion')">💬 Información y Comunicación</button>
+                <button class="tab" onclick="showTab('supervision')">🔍 Supervisión</button>
+            </div>
+
+            <!-- Tab: Vista General -->
+            <div id="overview" class="tab-content active">
+                <div class="section">
+                    <h3 class="section-title">
+                        Evaluación por Componentes COSO 2013
+                        <span class="efficiency-badge good">Eficacia: 82.2%</span>
+                    </h3>
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <canvas id="componentsChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">Resumen de Cumplimiento</h3>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">📋 Total Preguntas Evaluadas</span>
+                                <span class="component-score">44</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: 100%;">100%</div>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">✅ Cumplimientos</span>
+                                <span class="component-score" style="color: #38ef7d;">36</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: 82%; background: #38ef7d;">82%</div>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">❌ No Cumplimientos</span>
+                                <span class="component-score" style="color: #ff6b6b;">8</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: 18%; background: #ff6b6b;">18%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Ambiente de Control -->
+            <div id="ambiente" class="tab-content">
+                <div class="section">
+                    <h3 class="section-title">
+                        🏛️ Ambiente de Control
+                        <span class="efficiency-badge excellent">Eficacia: 18.2%</span>
+                    </h3>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existen políticas documentadas para la copropiedad</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">El consejo de administración ejerce supervisión independiente de la gestión del administrador</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se han establecido las responsabilidades del Consejo de Administrador de Copropiedad (NTS-TS 020)</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Las políticas/procedimientos se encuentran actualizadas para el Consejo de Administrador de Copropiedad</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se comunican las políticas, procedimientos y códigos de conducta</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Las comunicaciones formales (carteleras, volantes, etc.)</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existen políticas de selección del administrador y consular</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existen cláusulas de confidencialidad firmadas por administrador, contador, revisor fiscal y consejo de administración</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Están documentados los manuales de funciones de los cargos existentes</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Evaluación de Riesgos -->
+            <div id="riesgos" class="tab-content">
+                <div class="section">
+                    <h3 class="section-title">
+                        ⚠️ Evaluación de Riesgos
+                        <span class="efficiency-badge moderate">Eficacia: 27.3%</span>
+                    </h3>
+                    <div class="observations alert">
+                        <strong>⚠️ Observación Crítica:</strong> Sólo existe la del SGSST. Se recomienda de todos los procedimientos.
+                    </div>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se encuentra un plan de trabajo establecido conforme la NTS-TS 02/08</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                            <div class="observations">En la administración.</div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">La función de evaluación de riesgos implementado</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existe matriz de riesgos</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se constituye póliza que cubra la reposición de los bienes comunes</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">La información financiera es evaluada mensualmente por la administración</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Actividades de Control -->
+            <div id="actividades" class="tab-content">
+                <div class="section">
+                    <h3 class="section-title">
+                        ✅ Actividades de Control
+                        <span class="efficiency-badge excellent">Eficacia: 76.9%</span>
+                    </h3>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existe un acta de caja menor que asigna formalmente la responsabilidad de custodia y manejo de la caja</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se realizinge la recepción de dinero en efectivo o con cheque en la administración</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se encuentran segregadas las funciones de preparación y aprobación de compras y el pago total del anticipo</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                            <div class="observations alert">
+                                <strong>Por procedimiento existe un control dual entre administrador y consejo.</strong> En el portal bancario cuelgan al restricción todas las pagos.
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">En el caso de cheques, se requieren al menos dos firmas</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Las conciliaciones bancarias son revisadas por el administrador</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se restringen los pagos en efectivo del tesorero/contador conforme los montos establecidos en el RPH</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">El plan de trabajo establecido conforme NTS-TS 02/08 se encuentra en el consejo</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se prepara el informe mensualizado conforme la NTS-TS 02/08</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Información y Comunicación -->
+            <div id="informacion" class="tab-content">
+                <div class="section">
+                    <h3 class="section-title">
+                        💬 Información y Comunicación
+                        <span class="efficiency-badge excellent">Eficacia: 89.7%</span>
+                    </h3>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">El acceso a la oficina de administración se puede restringir sin su acceso</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existe caja fuerte para proteger valores de la copropiedad, chequeras, talonarios, etc.</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">El acceso a los ordenadores de la administración se encuentra restringido por contraseña</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se cuenta de manera oportuna las decisiones de la asamblea y el consejo de las oportunidades</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se efectúa las actualizaciones críticas de seguridad en el sistema</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                            <div class="observations">
+                                Cliente administrado por Rep Legal, y cfro dónde puede usar Windows defender.
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Los ordenadores de la copropiedad se encuentran protegidos con antivirus con licencia actualizada y válida</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                            <div class="observations">Windows defender.</div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Hay canales de comunicación establecidos para atender requerimientos de habeas data</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                            <div class="observations">Correo electrónico, whatsapp y móvil.</div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existen actas de consejo</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Las actas personales de los copropietarios/residentes se encuentran en lugares adecuados de acuerdo con la protección de datos personales (habeas data)</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                            <div class="observations">Pendiente por actualizar.</div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se efectúa respuesta de la información oportuna y adecuada en una semana contra inmediato</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                            <div class="observations">
+                                Últimas copas realizadas mes de junio 2709. Pendiente Nómina Mano oficial verbal (Doctor Andrés Camilo Rojas Molina Consejería) Rodrigo Palacio (consejero), (Diego Hernández (Consejera). Quien los adelantados de febrero).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Supervisión -->
+            <div id="supervision" class="tab-content">
+                <div class="section">
+                    <h3 class="section-title">
+                        🔍 Actividades de Supervisión
+                        <span class="efficiency-badge excellent">Eficacia: 83.3%</span>
+                    </h3>
+                    <div class="component-grid">
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existe un proceso de revisión de documentación soporte sobre un punto, orden de su aprobación</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">La copropiedad cuenta con un representante legal, quien revisa las transacciones</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se efectúa seguimiento sobre la antigüedad de las cuentas por cobrar, causatorias en buscos (copropietarios pendientes por identificar, chequeras devueltos de cobro, etc)</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se efectúa seguimiento a los procesos de asignación respectiva aprobación de consejo conforme al RPPL (Revisar RPM)</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se documentan las evaluaciones de gestión a la Administración</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                            <div class="observations">
+                                Seguimiento a matriz de pendientes presentada por Revisoría en últimas en el Consejo, y a disposición por venir.
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se efectúa seguimiento a los planes de acción existente sobre los hallazgos de revisoría fiscal</span>
+                                <span style="color: #ff6b6b; font-weight: 700;">NO</span>
+                            </div>
+                            <div class="observations">Actualmente no presentan bitácoras, ni informes de gestión.</div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existe seguimiento sobre la ejecución de contratos y gastos (diferentes al administrador)</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Existe seguimiento sobre la ejecución proyectada por parte de consejos formalmente constituido</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Se realizan seguimiento sobre de cuenta del tesorero/soporte de los gastos presupuestados en la caja menor</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">La atención al PQRS está previsto por el consejo de administración</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">Fechas de asamblea, actas de consejo, informes de auditoría, ejecuciones presupuestales, etc. Consulta del cargo de asamblea/consejo</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                        <div class="component-card">
+                            <div class="component-header">
+                                <span class="component-title">La ejecución presupuestal se monitorea mediante reuniones periódicas</span>
+                                <span style="color: #38ef7d; font-weight: 700;">SÍ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclosure">
+                <strong>📌 Nota Aclaratoria:</strong> Este cuestionario de control interno sobre componentes de control bajo el Marco Conceptual Integrado COSO 2013 se realizó con base en entrevista al Administrador/a y Representante Legal. Las respuestas que hacen parte de cada uno de los componentes de control fueron a propósito de la propiedad horizontal y control interno en general.
+                <br><br>
+                Tengo en cuenta que se evaluaron las principales actividades que hacen parte de cada uno de los componentes de control interno para el sector de la propiedad horizontal y control interno en general.
+                <br><br>
+                <strong>⚖️ Aviso Legal y Copyright © 2025:</strong> Este dashboard y su código fuente están protegidos por derechos de autor. Queda estrictamente prohibida su reproducción, distribución, modificación, ingeniería inversa o uso no autorizado sin el consentimiento expreso por escrito del propietario. Las violaciones serán perseguidas conforme a la ley.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // © 2025 TODOS LOS DERECHOS RESERVADOS
+        // Este código es propiedad exclusiva del desarrollador
+        // Su uso, copia o distribución no autorizada está prohibida
+        // Violaciones serán perseguidas legalmente
+        // ==========================================
+        
+        (function() {
+            'use strict';
+            
+            // PROTECCIÓN 1: Deshabilitar click derecho
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                alert('⚠️ CONTENIDO PROTEGIDO\n\nEste dashboard está protegido por derechos de autor.\nLa copia no autorizada está prohibida.');
+                return false;
+            }, false);
+            
+            // PROTECCIÓN 2: Bloquear teclas de desarrollador
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'F12' || e.keyCode === 123) {
+                    e.preventDefault();
+                    alert('⚠️ Acceso denegado - Contenido protegido');
+                    return false;
+                }
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73)) {
+                    e.preventDefault();
+                    alert('⚠️ Acceso denegado - Contenido protegido');
+                    return false;
+                }
+                if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.keyCode === 74)) {
+                    e.preventDefault();
+                    alert('⚠️ Acceso denegado - Contenido protegido');
+                    return false;
+                }
+                if (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.keyCode === 85)) {
+                    e.preventDefault();
+                    alert('⚠️ Acceso denegado - Contenido protegido');
+                    return false;
+                }
+                if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.keyCode === 67)) {
+                    e.preventDefault();
+                    alert('⚠️ Acceso denegado - Contenido protegido');
+                    return false;
+                }
+                if (e.ctrlKey && (e.key === 's' || e.key === 'S' || e.keyCode === 83)) {
+                    e.preventDefault();
+                    alert('⚠️ Acceso denegado - Contenido protegido');
+                    return false;
+                }
+            }, false);
+            
+            // PROTECCIÓN 3: Detectar apertura de DevTools
+            let devtoolsOpen = false;
+            const threshold = 160;
+            
+            const detectDevTools = function() {
+                if (window.outerWidth - window.innerWidth > threshold || 
+                    window.outerHeight - window.innerHeight > threshold) {
+                    if (!devtoolsOpen) {
+                        devtoolsOpen = true;
+                        alert('⚠️ ALERTA DE SEGURIDAD\n\nHerramientas de desarrollador detectadas.\nEste contenido está protegido por derechos de autor.');
+                    }
+                } else {
+                    devtoolsOpen = false;
+                }
+            };
+            
+            setInterval(detectDevTools, 500);
+            
+            // PROTECCIÓN 4: Deshabilitar selección de texto
+            document.addEventListener('selectstart', function(e) {
+                e.preventDefault();
+                return false;
+            }, false);
+            
+            // PROTECCIÓN 5: Deshabilitar copiar
+            document.addEventListener('copy', function(e) {
+                e.preventDefault();
+                alert('⚠️ Acción bloqueada - Contenido protegido');
+                return false;
+            }, false);
+            
+            // PROTECCIÓN 6: Deshabilitar cortar
+            document.addEventListener('cut', function(e) {
+                e.preventDefault();
+                return false;
+            }, false);
+            
+            // PROTECCIÓN 7: Deshabilitar arrastrar
+            document.addEventListener('dragstart', function(e) {
+                e.preventDefault();
+                return false;
+            }, false);
+            
+            // PROTECCIÓN 8: Detectar cambio de foco
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    console.clear();
+                }
+            });
+            
+            // PROTECCIÓN 9: Limpiar consola periódicamente
+            setInterval(function() {
+                console.clear();
+            }, 1000);
+            
+            // Mensaje de advertencia en consola
+            console.log('%c⚠️ ADVERTENCIA DE SEGURIDAD', 'color: red; font-size: 40px; font-weight: bold;');
+            console.log('%cEste dashboard está protegido por derechos de autor.', 'color: red; font-size: 16px;');
+            console.log('%cEl acceso no autorizado a este código está prohibido.', 'color: red; font-size: 16px;');
+            console.log('%c© 2025 Todos los derechos reservados', 'color: red; font-size: 16px; font-weight: bold;');
+            
+        })();
+        
+        // Función para cambiar tabs
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Gráfico de barras - Componentes
+        const ctxBar = document.getElementById('componentsChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Ambiente Control', 'Eval. Riesgos', 'Act. Control', 'Info/Comun.', 'Supervisión'],
+                datasets: [{
+                    label: 'Eficacia (%)',
+                    data: [18.2, 27.3, 76.9, 89.7, 83.3],
+                    backgroundColor: [
+                        'rgba(56, 239, 125, 0.8)',
+                        'rgba(255, 195, 7, 0.8)',
+                        'rgba(56, 239, 125, 0.8)',
+                        'rgba(56, 239, 125, 0.8)',
+                        'rgba(56, 239, 125, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(56, 239, 125, 1)',
+                        'rgba(255, 195, 7, 1)',
+                        'rgba(56, 239, 125, 1)',
+                        'rgba(56, 239, 125, 1)',
+                        'rgba(56, 239, 125, 1)'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Eficacia por Componente COSO',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico Radar
+        const ctxRadar = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['Ambiente de Control', 'Evaluación de Riesgos', 'Actividades de Control', 'Información y Comunicación', 'Supervisión'],
+                datasets: [{
+                    label: 'Eficacia',
+                    data: [18.2, 27.3, 76.9, 89.7, 83.3],
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(102, 126, 234, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evaluación COSO 2013 - Vista Radar',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20,
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Animación de barras de progreso
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const bars = document.querySelectorAll('.progress-bar');
+                bars.forEach(bar => {
+                    const width = bar.style.width;
+                    bar.style.width = '0%';
+                    setTimeout(() => {
+                        bar.style.width = width;
+                    }, 100);
+                });
+            }, 300);
+        });
+    </script>
+</body>
+</html>
